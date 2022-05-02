@@ -1,12 +1,13 @@
 require 'logger'
 require 'strscan'
 require 'uri'
+require 'cgi'
 
 class PukipaParseError < StandardError;end
 
 class Pukipa
   def initialize(plain)
-    @plain = plain 
+    @plain = plain
 @log = DummyLogger.new
 =begin
     @log = Logger::new( $deferr )
@@ -19,15 +20,16 @@ class Pukipa
   end
 
   # arrayでpagelistを渡す
-  # pagelistはwikiページ一覧 
+  # pagelistはwikiページ一覧
   def pagelist(pagelist,base_uri = '/',suffix = '/')
     @base_uri = base_uri
     @pagelist_suffix = suffix
     if pagelist.size > 0
       #三文字以下はそもそも対象外
-      pagelist.reject!{|pn| pn.size <= 3 }
+      pagelist.reject!{|pn| pn.size < 2 }
       pagelist.map!{|pn| Regexp.escape(pn)}
       @pagelist = Regexp.new('(?!<a.*?>.*?)((?:' + pagelist.join(')|(?:') + '))(?!.*?</a>)',Regexp::IGNORECASE )
+      p @pagelist
     end
   end
 
@@ -57,7 +59,7 @@ class Pukipa
     end
     result.join("\n")
   end
-  
+
   protected
   # h(見出し) のパーサ
   def h_parse(str)
@@ -71,7 +73,7 @@ class Pukipa
     }
     h_regexs.each do |tmp_regex,prefix|
       regex = Regexp.new('^' + Regexp.escape(tmp_regex) + '([^*])')
-      if str =~ regex 
+      if str =~ regex
         str.gsub!(regex,"\\1").gsub!(/^\s+/,'')
         str = "<%s>%s</%s>" % [prefix,str_parse(str),prefix]
         break
@@ -80,17 +82,17 @@ class Pukipa
     @log.debug "inline:\n%s" % str
     str
   end
-  
+
   #blockなもののパーサ
   def block_parse(str)
     str.chomp!
 
     if str =~ /^ /
-      str = str.map{|s| s.gsub(/^ /,'')}.join
+      str = str.lines.map{|s| s.gsub(/^ /,'')}.join
       # preの時はstr_parseしない
-      str = ['<pre><code>' + escapeHTML(str),'</code></pre>'].join "\n"
+      str = ['<pre><code>' + CGI.escapeHTML(str),'</code></pre>'].join "\n"
     elsif str =~ /^>/
-      str = str.map{|s| s.gsub(/^>/,'')}.join
+      str = str.lines.map{|s| s.gsub(/^>/,'')}.join
       str = ['<blockquote><p>',str_parse(str),'</p></blockquote>'].join "\n"
     elsif str =~ /^-/
       str = list_parse(str,'ul')
@@ -112,7 +114,7 @@ class Pukipa
     else
       regex = /^\+/
     end
-    str = str.map{|s| s.gsub(regex,'')}.join
+    str = str.lines.map{|s| s.gsub(regex,'')}.join
     result = []
     result << "<#{list}>"
     tmp = []
@@ -145,7 +147,7 @@ class Pukipa
   def dl_parse(str)
     regex = /^:/
     regex2 = /(.*?)\|(.*)/
-    str = str.map{|s| s.gsub(regex,'')}.join
+    str = str.lines.map{|s| s.gsub(regex,'')}.join
     result = []
     result << "<dl>"
     tmp = []
@@ -173,10 +175,10 @@ class Pukipa
       uri = $1.dup
       re = match
       re = '[[%s:%s]]' % [uri,uri] if not uri =~ /\]\]$/
-      re 
+      re
     end
 
-    str = escapeHTML(str)
+    str = CGI.escapeHTML(str)
 
     #リンク
     str.gsub!(/\[\[(.+?):\s*(https?:\/\/.+?)\s*\]\]/) do
@@ -189,7 +191,7 @@ class Pukipa
     if @pagelist
       str.gsub!(@pagelist) do
         s = $1.dup
-        '<a class="pagelink" href="%s%s%s">%s</a>' % [@base_uri,escape(s),@pagelist_suffix,s]
+        '<a class="pagelink" href="%s%s%s">%s</a>' % [@base_uri,CGI.escape(s),@pagelist_suffix,s]
       end
     end
 
@@ -198,15 +200,5 @@ class Pukipa
 
   def uri_re
     @uri_re ||= /(?!\[\[.*?)(#{URI.regexp('http')})(?!.*?\]\])/x
-  end
-    
-  def escapeHTML(string)
-    string.gsub(/&/n, '&amp;').gsub(/\"/n, '&quot;').gsub(/>/n, '&gt;').gsub(/</n, '&lt;')
-  end
-
-  def escape(string)
-    string.gsub(/([^ a-zA-Z0-9_.-]+)/n) do
-      '%' + $1.unpack('H2' * $1.size).join('%').upcase
-    end.tr(' ', '+')
   end
 end

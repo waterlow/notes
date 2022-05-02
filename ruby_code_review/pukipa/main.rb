@@ -1,11 +1,11 @@
-require 'pukipa'
-require 'pukiwikiparser'
+require './pukipa'
+require './pukiwikiparser'
 require 'benchmark'
 require 'digest/md5'
 
 def main
   body = File.read('input.puki')
-  page_names = ['文法', '自動リンク']
+  page_names = ['文法', '自動リンク', 'unique_link']
   case ARGV[0]
   when 'benchmark'
     exec_benchmark body, page_names

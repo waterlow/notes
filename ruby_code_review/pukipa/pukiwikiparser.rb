@@ -1,26 +1,7 @@
 require 'uri'
-
-module HTMLUtils
-  ESC = {
-    '&' => '&amp;',
-    '"' => '&quot;',
-    '<' => '&lt;',
-    '>' => '&gt;'
-  }
-
-  def escape(str)
-    table = ESC   # optimize
-    str.gsub(/[&"<>]/n) {|s| table[s] }
-  end
-  
-  def urlencode(str)
-    str.gsub(/[^\w\.\-]/n) {|ch| sprintf('%%%02X', ch[0]) }
-  end
-end
+require 'cgi'
 
 class PukiWikiParser
-  include HTMLUtils
-
   def initialize(logger)
     @logger = logger
     @h_start_level = 2
@@ -121,7 +102,7 @@ class PukiWikiParser
 
   def parse_pre(lines)
     @logger.debug "pre: #{lines.inspect}"
-    [ "<pre><code>#{lines.map {|line| escape(line) }.join("\n")}",
+    [ "<pre><code>#{lines.map {|line| CGI.escapeHTML(line) }.join("\n")}",
       '</code></pre>']
   end
 
@@ -138,9 +119,10 @@ class PukiWikiParser
       >x
     str.gsub(@inline_re) {
       case
-      when htmlchar = $1 then escape(htmlchar)
+      when htmlchar = $1 then CGI.escapeHTML(htmlchar)
       when bracket  = $2 then a_href($3, bracket, 'outlink')
-      when pagename = $4 then a_href(page_uri(pagename), pagename, 'pagelink')
+      when pagename = $4
+        a_href(page_uri(pagename), pagename, 'pagelink')
       when uri      = $5 then a_href(uri, uri, 'outlink')
       else
         raise 'must not happen'
@@ -149,14 +131,14 @@ class PukiWikiParser
   end
 
   def a_href(uri, label, cssclass)
-    %Q[<a class="#{cssclass}" href="#{escape(uri)}">#{escape(label)}</a>]
+    %Q[<a class="#{cssclass}" href="#{CGI.escapeHTML(uri)}">#{CGI.escapeHTML(label)}</a>]
   end
 
   def autolink_re
-    Regexp.union(* @page_names.reject {|name| name.size <= 3 })
+    Regexp.union(* @page_names.reject {|name| name.size < 2 })
   end
 
   def page_uri(page_name)
-    "#{@base_uri}#{urlencode(page_name)}#{@pagelist_suffix}"
+    "#{@base_uri}#{CGI.escape(page_name)}#{@pagelist_suffix}"
   end
 end
