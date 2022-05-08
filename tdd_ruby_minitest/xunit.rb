@@ -8,6 +8,10 @@ class TestCase # rubocop:disable Style/Documentation
   def run
     public_send(@name)
   end
+
+  def assert(bool)
+    bool ? p('ok') : raise('assertion error')
+  end
 end
 
 class WasRun < TestCase # rubocop:disable Style/Documentation
@@ -21,10 +25,9 @@ end
 class TestCaseTest < TestCase # rubocop:disable Style/Documentation
   def test_running
     test = WasRun.new('test_method')
-    raise if test.was_run
-
+    assert(!test.was_run)
     test.run
-    raise unless test.was_run
+    assert(test.was_run)
   end
 end
 
