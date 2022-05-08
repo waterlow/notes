@@ -10,7 +10,10 @@ class TestCase # rubocop:disable Style/Documentation
   def run
     set_up
     public_send(@name)
+    tear_down
   end
+
+  def tear_down; end
 
   def assert(bool)
     bool ? p('ok') : raise('assertion error')
@@ -18,36 +21,27 @@ class TestCase # rubocop:disable Style/Documentation
 end
 
 class WasRun < TestCase # rubocop:disable Style/Documentation
-  attr_reader :was_run, :was_set_up
+  attr_reader :log
 
   def test_method
-    @was_run = 1
+    @log += 'test_method '
   end
 
   def set_up
-    @was_set_up = 1
+    @log = 'set_up '
+  end
+
+  def tear_down
+    @log += 'tear_down '
   end
 end
 
 class TestCaseTest < TestCase # rubocop:disable Style/Documentation
-  def set_up
-    @test = WasRun.new('test_method')
-  end
-
-  def test_running
+  def test_template_method
+    test = WasRun.new('test_method')
     test.run
-    assert(test.was_run)
+    assert(test.log == 'set_up test_method tear_down ')
   end
-
-  def test_set_up
-    test.run
-    assert(test.was_set_up)
-  end
-
-  private
-
-  attr_reader :test
 end
 
-TestCaseTest.new('test_running').run
-TestCaseTest.new('test_set_up').run
+TestCaseTest.new('test_template_method').run
