@@ -21,21 +21,26 @@ class TestCase # rubocop:disable Style/Documentation
   def tear_down; end
 
   def assert(bool)
-    bool ? p('ok') : raise('assertion error')
+    bool || raise('assertion error')
   end
 end
 
 class TestResult # rubocop:disable Style/Documentation
   def initialize
     @run_count = 0
+    @error_count = 0
   end
 
   def test_started
     @run_count += 1
   end
 
+  def test_finished
+    @error_count += 1
+  end
+
   def summary
-    "#{@run_count} run, 0 failed"
+    "#{@run_count} run, #{@error_count} failed"
   end
 end
 
@@ -77,8 +82,16 @@ class TestCaseTest < TestCase # rubocop:disable Style/Documentation
     result = test.run
     assert(result.summary == '1 run, 1 failed')
   end
+
+  def test_failed_result_formatting
+    result = TestResult.new
+    result.test_started
+    result.test_finished
+    assert(result.summary == '1 run, 1 failed')
+  end
 end
 
-TestCaseTest.new('test_template_method').run
-TestCaseTest.new('test_result').run
+p TestCaseTest.new('test_template_method').run.summary
+p TestCaseTest.new('test_result').run.summary
 # TestCaseTest.new('test_failed_result').run
+p TestCaseTest.new('test_failed_result_formatting').run.summary
