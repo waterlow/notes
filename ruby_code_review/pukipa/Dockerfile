@@ -13,7 +13,7 @@ RUN tar zxvf ruby-1.8.7-p374.tar.gz
 
 RUN cd ruby-1.8.7-p374 && \
   wget -O - "https://github.com/ruby/ruby/commit/0d58bb55985e787364b0235e5e69278d0f0ad4b0.patch" | sed -e '1,/Remove unused variable/d;/test_pkey_ec.rb /,$d'  | patch -p1 && \
-  ./configure && make && make install
+  ./configure --build=x86_64-unknown-linux-gnu && make && make install
 
 WORKDIR $INSTALL_PATH
 RUN (echo 'gem: --no-document' ; echo 'install: --no-document --no-ri --no-rdoc' ; echo 'update: --no-document --no-ri --no-rdoc') > ~/.gemrc
