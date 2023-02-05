@@ -1,0 +1,24 @@
+FROM ubuntu:18.04
+
+ENV INSTALL_PATH /app
+RUN mkdir -p $INSTALL_PATH
+WORKDIR $INSTALL_PATH
+
+RUN apt-get update && \
+  apt-get install -y \
+  bison \
+  build-essential \
+  zlib1g-dev \
+  wget \
+  libssl1.0-dev && \
+  wget https://cache.ruby-lang.org/pub/ruby/1.8/ruby-1.8.7-p374.tar.gz && \
+  tar zxvf ruby-1.8.7-p374.tar.gz && \
+  cd ruby-1.8.7-p374 && \
+  wget -O - "https://github.com/ruby/ruby/commit/0d58bb55985e787364b0235e5e69278d0f0ad4b0.patch" | sed -e '1,/Remove unused variable/d;/test_pkey_ec.rb /,$d'  | patch -p1 && \
+  ./configure --build=x86_64-unknown-linux-gnu && make && make install && \
+  (echo 'gem: --no-document' ; echo 'install: --no-document --no-ri --no-rdoc' ; echo 'update: --no-document --no-ri --no-rdoc') > ~/.gemrc && \
+  wget https://rubygems.org/rubygems/rubygems-2.6.12.tgz && \
+  tar zxvf rubygems-2.6.12.tgz && \
+  cd rubygems-2.6.12 && ruby setup.rb && \
+  gem install bundler -v 1.8.7 && \
+  rm -rf $INSTALL_PATH
