@@ -1,0 +1,10 @@
+version: '3'
+
+services:
+  ruby18:
+    build:
+      context: .
+      dockerfile: Dockerfile.ubuntu
+    volumes:
+      - .:/root
+    working_dir: /root
