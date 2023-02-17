@@ -1,12 +1,14 @@
 # frozen_string_literal: true
 
 class HourMinuteCounter # :nodoc:
+  Event = Struct.new(:amount, :time)
+
   def initialize
     @events = []
   end
 
-  def add(count)
-    @events.push([count, now])
+  def add(amount)
+    @events.push(Event.new(amount, now))
   end
 
   def minute_count
@@ -25,10 +27,10 @@ class HourMinuteCounter # :nodoc:
 
   def count_since(cutoff)
     count = 0
-    @events.reverse_each do |c, time|
-      break if time < cutoff
+    @events.reverse_each do |event|
+      break if event.time <= cutoff
 
-      count += c
+      count += event.amount
     end
 
     count
