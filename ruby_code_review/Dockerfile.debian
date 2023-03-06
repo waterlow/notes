@@ -1,0 +1,17 @@
+FROM debian:bullseye
+
+ENV INSTALL_PATH /app
+RUN mkdir -p $INSTALL_PATH
+WORKDIR $INSTALL_PATH
+
+RUN apt-get update
+RUN apt-get install -y wget build-essential zlib1g-dev
+RUN wget https://cache.ruby-lang.org/pub/ruby/1.8/ruby-1.8.7-p374.tar.gz
+RUN tar zxvf ruby-1.8.7-p374.tar.gz
+RUN cd ruby-1.8.7-p374 && ./configure --build=x86_64-unknown-linux-gnu && make && make install
+# RUN (echo 'gem: --no-document' ; echo 'install: --no-document --no-ri --no-rdoc' ; echo 'update: --no-document --no-ri --no-rdoc') > ~/.gemrc
+# RUN wget https://rubygems.org/rubygems/rubygems-2.6.12.tgz
+# RUN tar zxvf rubygems-2.6.12.tgz
+# RUN cd rubygems-2.6.12 && ruby setup.rb
+# RUN gem install bundler -v 1.8.7
+# RUN rm -rf $INSTALL_PATH
