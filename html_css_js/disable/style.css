@@ -1,0 +1,15 @@
+body {
+  text-align: center;
+  padding: 2rem;
+}
+
+.button {
+  margin-top: 1rem;
+  background: #0bd;
+  padding: .75rem 1rem;
+  border-radius: 8px;
+
+  &:disabled {
+    background: #ccc;
+  }
+}
