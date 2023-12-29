@@ -67,3 +67,26 @@ document.querySelector('#menu-close').addEventListener('click', () => {
     element.animate({ opacity: [1, 0] }, option)
   })
 })
+
+const observer = new IntersectionObserver((entries, observer) => {
+  entries.forEach((entry) => {
+    if (!entry.isIntersecting) return
+
+    entry.target.animate(
+      {
+        opacity: [0, 1],
+        translate: ['0 4rem', 0],
+        filter: ['blur(.4rem)', 'blur(0)']
+      },
+      {
+        duration: 2000,
+        fill: 'forwards',
+        easing: 'ease'
+      }
+    )
+    observer.unobserve(entry.target)
+  })
+})
+document.querySelectorAll('.fade-in').forEach((element) => {
+  observer.observe(element)
+})
