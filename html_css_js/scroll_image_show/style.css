@@ -1,0 +1,12 @@
+body {
+  text-align: center;
+  padding: 1rem;
+}
+
+.title {
+  margin: 50vh 0 50vh;
+}
+
+.image {
+  max-width: 100%;
+}
