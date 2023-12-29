@@ -55,6 +55,28 @@ LAYOUT
     padding: 0 1rem;
 }
 
+.loading {
+    background-color: var(--light-grey);
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: grid;
+    place-items: center;
+}
+
+.loading-screen {
+    background-color: var(--light-green);
+    position: fixed;
+    inset: 0;
+    z-index: 99989;
+    translate: 0 100vh;
+}
+
+.loading-text {
+    font-size: 2rem;
+    font-family: var(--oswald-font);
+}
+
 /*
 HERO
 ================================================ */
