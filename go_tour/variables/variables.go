@@ -6,7 +6,7 @@ var c, python, java bool
 
 
 func main() {
-	var i = 1
-	var c, python, java = false, false, "aa"
+	i := 1
+	c, python, java := false, false, "aa"
 	fmt.Println(i, c, python, java)
 }
