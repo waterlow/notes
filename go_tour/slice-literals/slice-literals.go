@@ -17,5 +17,4 @@ func main() {
 	}
 	fmt.Println(s)
 
-	a := {2,true}
 }
